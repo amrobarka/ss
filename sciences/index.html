@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('background.jpg');
+      background-size: cover;
+      text-align: center;
+      color: #333;
+    }
+
+    #title {
+      margin-top: 20px;
+      font-size: 32px;
+      color: black;
+    }
+
+    #start-screen {
+      display: block;
+      margin-top: 50px;
+    }
+
+    #question-box, #final-score, #review-screen {
+      display: none;
+    }
+
+    #group-input {
+      margin: 20px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    #start-button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #group-name {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #007bff;
+    }
+
+    #question-text {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #choices button {
+      display: block;
+      width: 30%;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      background-color: #d3d3d3;
+      color: black;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #choices button.selected {
+      background-color: gold;
+      color: black;
+    }
+
+    #next-button {
+      margin-top: 40px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+      width: 150px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #credits {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-size: 12px;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    .score-circle {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: yellow;
+      color: black;
+      font-size: 24px;
+      line-height: 100px;
+      font-weight: bold;
+    }
+
+    .final-score-text {
+      font-size: 32px;
+      margin-top: 20px;
+      color: #007bff;
+    }
+
+    #review-screen {
+      text-align: left;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .review-question {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .correct-answer {
+      color: green;
+      font-weight: bold;
+    }
+
+    .incorrect-answer {
+      color: lightcoral;
+      font-weight: bold;
+    }
+
+    table {
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .correct {
+      color: green;
+      font-weight: bold;
+    }
+
+    .incorrect {
+      color: lightcoral;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="title"> </div>
+
+<div id="start-screen">
+  <h3>.</h3>
+  <input type="text" id="group-input" placeholder="الاسم">
+  <button id="start-button" onclick="startGame()">دخول</button>
+</div>
+
+<div id="question-box">
+  <div id="group-name"></div>
+  <div id="question-text"></div>
+  <div id="choices"></div>
+</div>
+
+<button id="next-button" onclick="nextQuestion()">السؤال التالي</button>
+
+<div id="final-score">
+  <h3>نتيجتك:</h3>
+  <div class="score-circle" id="score-summary"></div>
+  <div id="group-name"></div>
+</div>
+
+<div id="review-screen">
+  <table id="review-table">
+    <thead>
+      <tr>
+        <th>السؤال</th>
+        <th>إجابتك</th>
+        <th>الإجابة الصحيحة</th>
+      </tr>
+    </thead>
+    <tbody id="review-answers"></tbody>
+  </table>
+</div>
+
+<div id="credits">إعداد: جمال الصباحي</div>
+
+<audio id="correct-sound" src="correct-answer.mp3"></audio>
+<audio id="wrong-sound" src="wrong-answer.mp3"></audio>
+
+<script>
+  let groupName = '';
+  let selectedQuestions = [];
+  let userAnswers = [];
+
+  const allQuestions = [
+    { question: "لا تحتاج البذور إلى ....... لكي تنبت", choices: ["ماء", "غذاء", "ضوء", "هواء"], correctAnswer: "ضوء" },
+    { question: "تمتص البذور الماء لتبدأ عملية", choices: ["الإنبات", "التزهير", "التنفس", "الخمول"], correctAnswer: "الإنبات" }
+  ];
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+
+  function startGame() {
+    const input = document.getElementById('group-input').value;
+    if (input.trim() === '') {
+      alert('يرجى إدخال الاسم!');
+      return;
+    }
+    groupName = input.trim();
+    selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('question-box').style.display = 'block';
+    document.querySelectorAll('#group-name').forEach(el => el.textContent = `الاسم : ${groupName}`);
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const question = selectedQuestions[currentQuestionIndex];
+    document.getElementById('question-text').innerText = question.question;
+
+    const choicesContainer = document.getElementById('choices');
+    choicesContainer.innerHTML = '';
+    question.choices.forEach(choice => {
+      const button = document.createElement('button');
+      button.innerText = choice;
+      button.onclick = () => selectAnswer(button, choice, question.correctAnswer);
+      choicesContainer.appendChild(button);
+    });
+
+    document.getElementById('next-button').style.display = 'none';
+  }
+
+  function selectAnswer(button, selected, correct) {
+    const isCorrect = selected === correct;
+    button.classList.add('selected');
+    button.disabled = true;
+
+    const answer = {
+      question: selectedQuestions[currentQuestionIndex].question,
+      selectedAnswer: selected,
+      correctAnswer: correct
+    };
+    userAnswers.push(answer);
+
+    if (isCorrect) {
+      score++;
+      document.getElementById('correct-sound').play();
+    } else {
+      document.getElementById('wrong-sound').play();
+    }
+
+    document.getElementById('next-button').style.display = 'inline-block';
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < selectedQuestions.length) {
+      loadQuestion();
+    } else {
+      showFinalScore();
+    }
+  }
+
+  function showFinalScore() {
+    document.getElementById('question-box').style.display = 'none';
+    document.getElementById('final-score').style.display = 'block';
+
+    document.getElementById('score-summary').innerText = `${score} / ${selectedQuestions.length}`;
+    displayReviewScreen();
+    document.getElementById('next-button').style.display = 'none';
+  }
+
+  function displayReviewScreen() {
+    const reviewAnswersContainer = document.getElementById('review-answers');
+    reviewAnswersContainer.innerHTML = '';
+
+    userAnswers.forEach(answer => {
+      const row = document.createElement('tr');
+      const userAnswerClass = answer.selectedAnswer === answer.correctAnswer ? 'correct' : 'incorrect';
+
+      row.innerHTML = `
+        <td>${answer.question}</td>
+        <td class="${userAnswerClass}">${answer.selectedAnswer}</td>
+        <td class="correct">${answer.correctAnswer}</td>
+      `;
+
+      reviewAnswersContainer.appendChild(row);
+    });
+
+    document.getElementById('review-screen').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
