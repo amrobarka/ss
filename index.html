@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مادة تقنية المعلومات</title>
+</head>
+<body>
+  <h1>مادة تقنية المعلومات</h1>
+  <label for="name">الاسم:</label>
+  <input type="text" id="name" placeholder="أدخل اسمك">
+  <button onclick="submitName()">دخول</button>
+
+  <script>
+    async function submitName() {
+      const name = document.getElementById('name').value.trim();
+      if (!name) {
+        alert('يرجى إدخال الاسم');
+        return;
+      }
+
+      const token = 'YOUR_PERSONAL_ACCESS_TOKEN'; // ضع التوكن هنا
+      const repo = 'student-names'; // اسم المستودع
+      const owner = 'YOUR_GITHUB_USERNAME'; // اسم المستخدم
+      const filePath = `names/${Date.now()}.txt`; // كل اسم يتم حفظه كملف جديد
+
+      const content = btoa(name); // تحويل النص إلى Base64
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Adding new name: ${name}`,
+            content: content
+          })
+        });
+
+        if (response.ok) {
+          alert(`تم حفظ الاسم: ${name}`);
+        } else {
+          const errorData = await response.json();
+          console.error(errorData);
+          alert('حدث خطأ أثناء الحفظ');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('تعذر الاتصال بـ GitHub');
+      }
+    }
+  </script>
+</body>
+</html>
