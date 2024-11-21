@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استعلام عن الطالب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>استعلام عن اسم الطالب</h1>
+    <label for="civilId">الرقم المدني:</label>
+    <input type="text" id="civilId" placeholder="أدخل الرقم المدني">
+    <button onclick="getStudentName()">دخول</button>
+    <p id="result"></p>
+
+    <script>
+        async function getStudentName() {
+            const civilId = document.getElementById('civilId').value;
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = "جارٍ الاستعلام...";
+
+            try {
+                // رابط ملف JSON من مستودع GitHub
+                const response = await fetch('https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/students.json');
+                const data = await response.json();
+
+                // البحث عن الطالب بالرقم المدني
+                const student = data.find(student => student.civil_id === civilId);
+
+                if (student) {
+                    resultElement.textContent = `اسم الطالب: ${student.name}`;
+                } else {
+                    resultElement.textContent = "لم يتم العثور على طالب بهذا الرقم المدني.";
+                }
+            } catch (error) {
+                resultElement.textContent = "حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
