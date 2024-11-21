@@ -1,0 +1,12 @@
+[
+  { "civil_id": "9730722", "name": "سعود بن خلف الصقري ", "grade": "5", "email": "saud.asqri@edu.moe.om" },
+  { "civil_id": "13617464", "name": "طلال بن سالم المحرزي", "grade": "6", "email": "talal.almahrezi@edu.moe.om" },
+  { "civil_id": "112233445", "name": "سعيد البلوشي", "grade": "7", "email": "saeed@example.com" },
+  { "civil_id": "556677889", "name": "مريم الشحية", "grade": "8", "email": "mariam@edu.moe.com" },
+  { "civil_id": "998877665", "name": "خالد السيابي", "grade": "5", "email": "khaled@edu.moe.om" },
+  { "civil_id": "334455667", "name": "ليلى الرواحية", "grade": "6", "email": "layla@example.com" },
+  { "civil_id": "223344556", "name": "ناصر الهنائي", "grade": "7", "email": "nasser@example.com" },
+  { "civil_id": "778899001", "name": "هالة الحبسي", "grade": "8", "email": "hala@example.com" },
+  { "civil_id": "445566778", "name": "علي الكندي", "grade": "5", "email": "ali@example.com" },
+  { "civil_id": "667788990", "name": "سارة العامري", "grade": "6", "email": "sara@example.com" }
+]
