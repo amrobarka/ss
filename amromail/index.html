@@ -73,8 +73,8 @@
 <div class="container">
     <img src="amro.jpg" alt="Amro Logo">
     <h1>استعلام عن البريد الإلكتروني</h1>
-    <label for="civilId">رقم هاتف ولي الأمر:</label>
-    <input type="text" id="civilId" placeholder="أدخل رقم الهاتف">
+    <label for="phone">رقم هاتف ولي الأمر:</label>
+    <input type="text" id="phone" placeholder="أدخل رقم الهاتف">
     <button onclick="getStudentEmail()">موافق</button>
     <p id="result"></p>
     <p id="email" class="email"></p> <!-- لإظهار البريد الإلكتروني -->
@@ -87,10 +87,10 @@
     }
 
     async function getStudentEmail() {
-        let civilId = document.getElementById('civilId').value;
+        let phone = document.getElementById('phone').value;
 
         // تحويل الأرقام الهندية إلى أرقام عربية
-        civilId = convertToArabicNumbers(civilId);
+        phone = convertToArabicNumbers(phone);
 
         const resultElement = document.getElementById('result');
         const emailElement = document.getElementById('email');
@@ -107,7 +107,7 @@
             console.log(data); // لتأكد من أن البيانات تم تحميلها بشكل صحيح
 
             // البحث عن الطالب
-            const student = data.find(student => student.civil_id === civilId);
+            const student = data.find(student => student.civil_id === phone);
 
             if (student) {
                 const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
