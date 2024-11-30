@@ -115,7 +115,7 @@
 
             const students = data.filter(student => student.phone === parseInt(phone));
             if (students.length > 0) {
-                resultElement.textContent = `تم العثور على ${students.length} طالب/طالبة:`;
+                resultElement.textContent = `تم العثور على ${students.length} طالب:`;
 
                 // إنشاء جدول لعرض البيانات
                 const table = document.createElement('table');
