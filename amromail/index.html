@@ -1,82 +1,112 @@
-async function fetchDecryptedData() {
-    try {
-        console.log("تحميل المفتاح...");
-        const keyResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/key.key'); // رابط key.key من GitHub
-        if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
-        const key = await keyResponse.text().trim();
-        console.log("تم تحميل المفتاح:", key);
-
-        console.log("تحميل البيانات المشفرة...");
-        const encryptedResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/students_encrypted.json'); // رابط students_encrypted.json من GitHub
-        if (!encryptedResponse.ok) throw new Error("تعذر تحميل ملف البيانات المشفرة.");
-        const encryptedData = await encryptedResponse.text();
-        console.log("تم تحميل البيانات المشفرة:", encryptedData);
-
-        // فك التشفير
-        console.log("فك التشفير...");
-        const bytes = CryptoJS.AES.decrypt(encryptedData, key);
-        const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
-
-        if (!decryptedData) throw new Error("فك التشفير فشل، البيانات فارغة");
-
-        console.log("البيانات المفككة:", decryptedData);
-        return JSON.parse(decryptedData);
-    } catch (error) {
-        console.error("خطأ أثناء فك التشفير:", error.message);
-        return null;
-    }
-}
-
-async function getStudentEmails() {
-    let phone = document.getElementById('phone').value;
-    phone = convertToArabicNumbers(phone);
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فك تشفير البيانات</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-crypto-js.js"></script> <!-- تضمين مكتبة CryptoJS -->
+</head>
+<body>
+    <h2>استعلام الطلاب</h2>
     
-    const resultElement = document.getElementById('result');
-    const tableContainer = document.getElementById('students-table');
-    resultElement.textContent = "جارٍ الاستعلام...";
-    tableContainer.innerHTML = ""; 
+    <label for="phone">رقم الهاتف:</label>
+    <input type="text" id="phone">
+    <button onclick="getStudentEmails()">بحث</button>
 
-    if (!phone.trim()) {
-        resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
-        return;
-    }
+    <div id="result"></div>
+    <div id="students-table"></div>
 
-    try {
-        const data = await fetchDecryptedData();  // استدعاء وظيفة فك التشفير
-        if (!data) {
-            resultElement.textContent = "حدث خطأ أثناء تحميل البيانات.";
-            return;
+    <script>
+        async function fetchDecryptedData() {
+            try {
+                console.log("تحميل المفتاح...");
+                const keyResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/key.key'); // رابط key.key من GitHub
+                if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
+                const key = await keyResponse.text().trim();
+                console.log("تم تحميل المفتاح:", key);
+
+                console.log("تحميل البيانات المشفرة...");
+                const encryptedResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/students_encrypted.json'); // رابط students_encrypted.json من GitHub
+                if (!encryptedResponse.ok) throw new Error("تعذر تحميل ملف البيانات المشفرة.");
+                const encryptedData = await encryptedResponse.text();
+                console.log("تم تحميل البيانات المشفرة:", encryptedData);
+
+                // فك التشفير
+                console.log("فك التشفير...");
+                const bytes = CryptoJS.AES.decrypt(encryptedData, key);
+                const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+
+                if (!decryptedData) throw new Error("فك التشفير فشل، البيانات فارغة");
+
+                console.log("البيانات المفككة:", decryptedData);
+                return JSON.parse(decryptedData);
+            } catch (error) {
+                console.error("خطأ أثناء فك التشفير:", error.message);
+                return null;
+            }
         }
 
-        console.log("البيانات:", data);
-        const students = data.filter(student => student.phone === parseInt(phone));
-        if (students.length > 0) {
-            resultElement.textContent = `تم العثور على ${students.length} طالب:`;
+        async function getStudentEmails() {
+            let phone = document.getElementById('phone').value;
+            phone = convertToArabicNumbers(phone);
+            
+            const resultElement = document.getElementById('result');
+            const tableContainer = document.getElementById('students-table');
+            resultElement.textContent = "جارٍ الاستعلام...";
+            tableContainer.innerHTML = ""; 
 
-            const table = document.createElement('table');
-            const headerRow = `
-                <tr>
-                    <th>اسم الطالب</th>
-                    <th>البريد الإلكتروني</th>
-                </tr>`;
-            table.innerHTML = headerRow;
+            if (!phone.trim()) {
+                resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
+                return;
+            }
 
-            students.forEach(student => {
-                const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
-                const row = `
-                    <tr>
-                        <td>${student.name}</td>
-                        <td>${email}</td>
-                    </tr>`;
-                table.innerHTML += row;
+            try {
+                const data = await fetchDecryptedData();  // استدعاء وظيفة فك التشفير
+                if (!data) {
+                    resultElement.textContent = "حدث خطأ أثناء تحميل البيانات.";
+                    return;
+                }
+
+                console.log("البيانات:", data);
+                const students = data.filter(student => student.phone === parseInt(phone));
+                if (students.length > 0) {
+                    resultElement.textContent = `تم العثور على ${students.length} طالب:`;
+
+                    const table = document.createElement('table');
+                    const headerRow = `
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>البريد الإلكتروني</th>
+                        </tr>`;
+                    table.innerHTML = headerRow;
+
+                    students.forEach(student => {
+                        const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
+                        const row = `
+                            <tr>
+                                <td>${student.name}</td>
+                                <td>${email}</td>
+                            </tr>`;
+                        table.innerHTML += row;
+                    });
+
+                    tableContainer.appendChild(table);
+                } else {
+                    resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
+                }
+            } catch (error) {
+                resultElement.textContent = "حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
+                console.error(error);
+            }
+        }
+
+        // دالة لتحويل الأرقام إلى أرقام عربية
+        function convertToArabicNumbers(str) {
+            const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return str.replace(/\d/g, function(digit) {
+                return arabicNumbers[digit];
             });
-
-            tableContainer.appendChild(table);
-        } else {
-            resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
         }
-    } catch (error) {
-        resultElement.textContent = "حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
-        console.error(error);
-    }
-}
+    </script>
+</body>
+</html>
