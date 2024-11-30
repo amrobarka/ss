@@ -87,77 +87,80 @@
 </div>
 
 <script>
-    function convertToArabicNumbers(input) {
-        return input.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+// تحويل الأرقام الهندية إلى أرقام عربية
+function convertToArabicNumbers(input) {
+    return input.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+}
+
+// فك تشفير البيانات باستخدام المفتاح
+function decryptData(encryptedData, key) {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, key);
+    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+    return JSON.parse(decryptedData);
+}
+
+async function getStudentEmails() {
+    let phone = document.getElementById('phone').value;
+
+    // تحويل الأرقام الهندية إلى أرقام عربية
+    phone = convertToArabicNumbers(phone);
+
+    const resultElement = document.getElementById('result');
+    const tableContainer = document.getElementById('students-table');
+    resultElement.textContent = "جارٍ الاستعلام...";
+    tableContainer.innerHTML = ""; // مسح الجدول السابق
+
+    if (!phone.trim()) {
+        resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
+        return;
     }
 
-    // دالة لفك التشفير باستخدام CryptoJS
-    function decryptData(encryptedData, key) {
-        // فك التشفير باستخدام AES
-        const bytes = CryptoJS.AES.decrypt(encryptedData, key);
-        return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    }
+    try {
+        // تحميل المفتاح من ملف key.key
+        const keyResponse = await fetch('key.key');
+        if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
+        const key = await keyResponse.text();
 
-    async function getStudentEmails() {
-        let phone = document.getElementById('phone').value;
+        // تحميل البيانات المشفرة من ملف students_encrypted.json
+        const response = await fetch('students_encrypted.json');
+        if (!response.ok) throw new Error("تعذر تحميل الملف من الرابط المحدد.");
+        
+        const encryptedData = await response.text();
+        const students = decryptData(encryptedData, key);
 
-        // تحويل الأرقام الهندية إلى أرقام عربية
-        phone = convertToArabicNumbers(phone);
+        // البحث عن الطلاب باستخدام الرقم المشفر
+        const filteredStudents = students.filter(student => student.phone === phone);
+        if (filteredStudents.length > 0) {
+            resultElement.textContent = `تم العثور على ${filteredStudents.length} طالب:`;
 
-        const resultElement = document.getElementById('result');
-        const tableContainer = document.getElementById('students-table');
-        resultElement.textContent = "جارٍ الاستعلام...";
-        tableContainer.innerHTML = ""; // مسح الجدول السابق
+            // إنشاء جدول لعرض البيانات
+            const table = document.createElement('table');
+            const headerRow = `
+                <tr>
+                    <th>اسم الطالب</th>
+                    <th>البريد الإلكتروني</th>
+                </tr>`;
+            table.innerHTML = headerRow;
 
-        if (!phone.trim()) {
-            resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
-            return;
-        }
-
-        try {
-            // تحميل مفتاح التشفير من ملف key.key (هنا يجب أن يكون المفتاح موجودًا بشكل ثابت)
-            const key = "your-secret-key";  // يجب استبدالها بالقيمة الفعلية للمفتاح
-
-            // تحميل البيانات المشفرة من ملف students_encrypted.json
-            const response = await fetch('students_encrypted.json');
-            if (!response.ok) throw new Error("تعذر تحميل الملف");
-
-            const encryptedData = await response.text();
-            const students = decryptData(encryptedData, key);
-
-            // البحث عن الطلاب باستخدام الرقم المشفر
-            const filteredStudents = students.filter(student => student.phone === phone);
-            if (filteredStudents.length > 0) {
-                resultElement.textContent = `تم العثور على ${filteredStudents.length} طالب:`;
-
-                // إنشاء جدول لعرض البيانات
-                const table = document.createElement('table');
-                const headerRow = `
+            filteredStudents.forEach(student => {
+                const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
+                const row = `
                     <tr>
-                        <th>اسم الطالب</th>
-                        <th>البريد الإلكتروني</th>
+                        <td>${student.name}</td>
+                        <td>${email}</td>
                     </tr>`;
-                table.innerHTML = headerRow;
+                table.innerHTML += row;
+            });
 
-                filteredStudents.forEach(student => {
-                    const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
-                    const row = `
-                        <tr>
-                            <td>${student.name}</td>
-                            <td>${email}</td>
-                        </tr>`;
-                    table.innerHTML += row;
-                });
-
-                tableContainer.appendChild(table);
-            } else {
-                resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
-            }
-        } catch (error) {
-            resultElement.textContent = "حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
-            console.error(error);
+            tableContainer.appendChild(table);
+        } else {
+            resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
         }
+    } catch (error) {
+        resultElement.textContent = `حدث خطأ أثناء الاستعلام: ${error.message}`;
+        console.error(error);
     }
+}
 </script>
 
 </body>
