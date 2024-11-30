@@ -24,7 +24,8 @@
             background-color: rgba(255, 255, 255, 0.7);
             padding: 20px;
             border-radius: 10px;
-            width: 350px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .container img {
             width: 100px;
@@ -50,15 +51,19 @@
         h1 {
             font-size: 24px;
         }
-        p {
-            font-size: 18px;
-            margin-top: 10px;
-        }
-        .email {
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 15px;
-            font-size: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        table th {
+            background-color: #f2f2f2;
             font-weight: bold;
-            color: black;
         }
         label {
             display: block;
@@ -75,9 +80,9 @@
     <h1>استعلام عن البريد الإلكتروني</h1>
     <label for="phone">رقم هاتف ولي الأمر:</label>
     <input type="text" id="phone" placeholder="أدخل رقم الهاتف">
-    <button onclick="getStudentEmail()">موافق</button>
+    <button onclick="getStudentEmails()">موافق</button>
     <p id="result"></p>
-    <p id="email" class="email"></p>
+    <div id="students-table"></div>
 </div>
 
 <script>
@@ -85,15 +90,16 @@
         return input.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     }
 
-    async function getStudentEmail() {
+    async function getStudentEmails() {
         let phone = document.getElementById('phone').value;
 
         // تحويل الأرقام الهندية إلى أرقام عربية
         phone = convertToArabicNumbers(phone);
 
         const resultElement = document.getElementById('result');
-        const emailElement = document.getElementById('email');
+        const tableContainer = document.getElementById('students-table');
         resultElement.textContent = "جارٍ الاستعلام...";
+        tableContainer.innerHTML = ""; // مسح الجدول السابق
 
         if (!phone.trim()) {
             resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
@@ -107,17 +113,35 @@
             const data = await response.json();
             console.log(data);
 
-            const student = data.find(student => student.phone === parseInt(phone));
-            if (student) {
-                const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
-                resultElement.textContent = `اسم الطالب: ${student.name}`;
-                emailElement.textContent = email;
+            const students = data.filter(student => student.phone === parseInt(phone));
+            if (students.length > 0) {
+                resultElement.textContent = `تم العثور على ${students.length} طالب/طالبة:`;
+
+                // إنشاء جدول لعرض البيانات
+                const table = document.createElement('table');
+                const headerRow = `
+                    <tr>
+                        <th>اسم الطالب</th>
+                        <th>البريد الإلكتروني</th>
+                    </tr>`;
+                table.innerHTML = headerRow;
+
+                students.forEach(student => {
+                    const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
+                    const row = `
+                        <tr>
+                            <td>${student.name}</td>
+                            <td>${email}</td>
+                        </tr>`;
+                    table.innerHTML += row;
+                });
+
+                tableContainer.appendChild(table);
             } else {
-                resultElement.textContent = "لم يتم العثور على طالب بهذا الرقم المسجل.";
-                emailElement.textContent = "";
+                resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
             }
         } catch (error) {
-            resultElement.textContent = " حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
+            resultElement.textContent = "حدث خطأ أثناء الاستعلام. تحقق من اتصال الإنترنت.";
             console.error(error);
         }
     }
