@@ -1,13 +1,13 @@
 async function fetchDecryptedData() {
     try {
         console.log("تحميل المفتاح...");
-        const keyResponse = await fetch('key.key');
+        const keyResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/key.key'); // رابط key.key من GitHub
         if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
         const key = await keyResponse.text().trim();
         console.log("تم تحميل المفتاح:", key);
 
         console.log("تحميل البيانات المشفرة...");
-        const encryptedResponse = await fetch('students_encrypted.json');
+        const encryptedResponse = await fetch('https://raw.githubusercontent.com/username/repository/branch/students_encrypted.json'); // رابط students_encrypted.json من GitHub
         if (!encryptedResponse.ok) throw new Error("تعذر تحميل ملف البيانات المشفرة.");
         const encryptedData = await encryptedResponse.text();
         console.log("تم تحميل البيانات المشفرة:", encryptedData);
