@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استعلام عن البريد الإلكتروني</title>
-    <script src="crypto-js.js"></script> <!-- رابط للمكتبة المحلية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> <!-- مكتبة التشفير -->
     <style>
-       body {
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -87,80 +87,80 @@
 </div>
 
 <script>
-// تحويل الأرقام الهندية إلى أرقام عربية
-function convertToArabicNumbers(input) {
-    return input.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-}
-
-// فك تشفير البيانات باستخدام المفتاح
-function decryptData(encryptedData, key) {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, key);
-    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
-    return JSON.parse(decryptedData);
-}
-
-async function getStudentEmails() {
-    let phone = document.getElementById('phone').value;
-
     // تحويل الأرقام الهندية إلى أرقام عربية
-    phone = convertToArabicNumbers(phone);
-
-    const resultElement = document.getElementById('result');
-    const tableContainer = document.getElementById('students-table');
-    resultElement.textContent = "جارٍ الاستعلام...";
-    tableContainer.innerHTML = ""; // مسح الجدول السابق
-
-    if (!phone.trim()) {
-        resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
-        return;
+    function convertToArabicNumbers(input) {
+        return input.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     }
 
-    try {
-        // تحميل المفتاح من ملف key.key
-        const keyResponse = await fetch('key.key');
-        if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
-        const key = await keyResponse.text();
+    // فك تشفير البيانات
+    function decryptData(encryptedData, key) {
+        const bytes = CryptoJS.AES.decrypt(encryptedData, key);
+        return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    }
 
-        // تحميل البيانات المشفرة من ملف students_encrypted.json
-        const response = await fetch('students_encrypted.json');
-        if (!response.ok) throw new Error("تعذر تحميل الملف من الرابط المحدد.");
-        
-        const encryptedData = await response.text();
-        const students = decryptData(encryptedData, key);
+    async function getStudentEmails() {
+        let phone = document.getElementById('phone').value;
 
-        // البحث عن الطلاب باستخدام الرقم المشفر
-        const filteredStudents = students.filter(student => student.phone === phone);
-        if (filteredStudents.length > 0) {
-            resultElement.textContent = `تم العثور على ${filteredStudents.length} طالب:`;
+        // تحويل الأرقام الهندية إلى أرقام عربية
+        phone = convertToArabicNumbers(phone);
 
-            // إنشاء جدول لعرض البيانات
-            const table = document.createElement('table');
-            const headerRow = `
-                <tr>
-                    <th>اسم الطالب</th>
-                    <th>البريد الإلكتروني</th>
-                </tr>`;
-            table.innerHTML = headerRow;
+        const resultElement = document.getElementById('result');
+        const tableContainer = document.getElementById('students-table');
+        resultElement.textContent = "جارٍ الاستعلام...";
+        tableContainer.innerHTML = ""; // مسح الجدول السابق
 
-            filteredStudents.forEach(student => {
-                const email = student.email ? student.email : "البريد الإلكتروني غير موجود";
-                const row = `
-                    <tr>
-                        <td>${student.name}</td>
-                        <td>${email}</td>
-                    </tr>`;
-                table.innerHTML += row;
-            });
-
-            tableContainer.appendChild(table);
-        } else {
-            resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجل.";
+        if (!phone.trim()) {
+            resultElement.textContent = "يرجى إدخال رقم هاتف صحيح.";
+            return;
         }
-    } catch (error) {
-        resultElement.textContent = `حدث خطأ أثناء الاستعلام: ${error.message}`;
-        console.error(error);
+
+        try {
+            // تحميل المفتاح
+            const keyResponse = await fetch('key.key');
+            if (!keyResponse.ok) throw new Error("تعذر تحميل ملف المفتاح.");
+            const key = await keyResponse.text();
+
+            // تحميل الملف المشفر
+            const encryptedResponse = await fetch('students_encrypted.json');
+            if (!encryptedResponse.ok) throw new Error("تعذر تحميل الملف المشفر.");
+            const encryptedData = await encryptedResponse.text();
+
+            // فك تشفير البيانات
+            const students = decryptData(encryptedData, key.trim());
+
+            // البحث عن الطالب
+            const filteredStudents = students.filter(student => student.phone === phone);
+            if (filteredStudents.length > 0) {
+                resultElement.textContent = `تم العثور على ${filteredStudents.length} طالب:`;
+
+                // إنشاء جدول
+                const table = document.createElement('table');
+                const headerRow = `
+                    <tr>
+                        <th>اسم الطالب</th>
+                        <th>البريد الإلكتروني</th>
+                    </tr>`;
+                table.innerHTML = headerRow;
+
+                filteredStudents.forEach(student => {
+                    const email = student.email || "غير متوفر";
+                    const row = `
+                        <tr>
+                            <td>${student.name}</td>
+                            <td>${email}</td>
+                        </tr>`;
+                    table.innerHTML += row;
+                });
+
+                tableContainer.appendChild(table);
+            } else {
+                resultElement.textContent = "لم يتم العثور على طلاب بهذا الرقم المسجــــــل.";
+            }
+        } catch (error) {
+            resultElement.textContent = `حدث خطأ أثناء الاستعـــــلام: ${error.message}`;
+            console.error(error);
+        }
     }
-}
 </script>
 
 </body>
