@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> اختبار تفاعلي في مادة الدراسات الإجتماعية _ الصف التاسع _ الفصل الدراسي الأول</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #quiz-container {
+      width: 95%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+  #choices button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #choices button:hover {
+      background-color: #0056b3;
+    }
+
+    #choices button.correct {
+      background-color: #28a745;
+    }
+
+    #choices button.wrong {
+      background-color: #dc3545;
+    }
+
+    #next-button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #next-button:hover {
+      background-color: #218838;
+    }
+
+    #next-button.hidden {
+      display: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+
+    #result-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #result-popup .circle {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      border: 4px solid #007BFF;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      line-height: 120px;
+      font-size: 1.6em;
+      color: #007BFF;
+    }
+
+   #retry-button {
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #retry-button:hover {
+      background-color: #218838;
+    }
+
+    /* شاشة الترحيب */
+   #welcome-screen {
+  background-image: url('face.jpg'); /* اسم الصورة هنا */
+  background-size: contain; /* جعل الصورة تتناسب مع المساحة ولكن مع الحفاظ على نسبتها */
+  background-position: center; /* لضبط الصورة في منتصف الشاشة */
+  background-repeat: no-repeat; /* لمنع تكرار الصورة */
+  width: 100%;
+  height: 100vh; /* ملء الشاشة بالكامل */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* النص باللون الأبيض لضمان وضوحه */
+  text-align: center;
+}
+
+
+    #welcome-screen button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #welcome-screen button:hover {
+      background-color: #218838;
+    }
+
+    /* تنسيق السؤال */
+    #question-container {
+      background-color: #e0f7fa;
+      padding: 20px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question-image {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* تنسيق نتائج الأسئلة */
+    .question-summary {
+      text-align: left;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .correct-answer {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .wrong-answer {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .user-answer {
+      font-weight: bold;
+    }
+
+    .incorrect-user-answer {
+      color: #dc3545;
+    }
+
+    /* لرقم السؤال الحالي */
+    #current-question-info {
+      font-size: 1.1em;
+      margin-top: 20px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    /* سكرول بار للتفاصيل */
+    #detailed-summary {
+      max-height: 300px; /* يمكنك تعديل الارتفاع حسب احتياجك */
+      overflow-y: auto;
+      padding-right: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+ <!-- شاشة الترحيب -->
+<div id="welcome-screen">
+  <div style="position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <img src="welcome-image.jpg" alt="صورة ترحيبية" style="width: 100px; height: auto; position: absolute; top: 10px; right: 140px;">
+       
+    <!-- صندوق النص -->
+    <div style="margin-top: -100px; padding: 20px; border: 2px solid #333; border-radius: 10px; background-color: rgba(255, 255, 255, 0.5); width: 70%; text-align: center;">
+      <div style="font-size: 24px; font-weight: bold; color: #333;">
+  <br>
+     اختبار تفاعلي في <span style="color: #000; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">مادة الدراسات الاجتماعية</span><br>
+الفصل الدراسي الأول
+      </div>
+      <div style="font-size: 18px; color: #333; margin-top: 10px;">
+     <span style="font-size: 30px; color: #006400; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">الصف التاسع</span>
+      </div>
+      <div style="font-size: 0.8em; color: #003366; margin-top: 20px;">
+        اعداد الأسئلة : أ.أحمد سيد<br>
+        تصميم وبرمجة : أ.طلال المحرزي<br>
+    ولاية بركاء<br>
+        <a href="mailto:surmad7@gmail.com" style="color: #003366;">surmad7@gmail.com</a><br>
+      </div>
+    </div>
+
+    <button onclick="startQuiz()" style="position: absolute; bottom: 20px; left: 140px;">دخول</button>
+  </div>
+</div>
+
+
+<!-- نافذة الأسئلة -->
+<div id="quiz-container" style="display: none;">
+  <div id="question-container" style="text-align: center; margin-bottom: 20px;">
+    <img id="question-image" src="" alt="سؤال صورة" style="display:none; width: 50%; max-width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19); border-radius: 10px; margin: 10px auto;">
+    <br>
+    <div id="question" style="font-size: 24px; font-weight: bold; color: #333;">سؤال</div>
+  </div>
+  <div id="choices"></div>
+  <button id="next-button" onclick="nextQuestion()">التالي</button>
+  <div id="current-question-info" style="margin-top: 10px; font-size: 18px; color: #555;">السؤال 1 من 3</div>
+</div>
+
+  <div id="overlay"></div>
+  <div id="result-popup">
+    <div class="circle" id="final-score">0</div>
+    <p id="summary"></p>
+    <div id="summary-container">
+      <div id="detailed-summary"></div>
+    </div>
+    <button id="retry-button" onclick="restartQuiz()">إعادة المحاولة</button>
+  </div>
+
+  <!-- أصوات -->
+  <audio id="correct-sound" src="correct-answer.mp3"></audio>
+  <audio id="wrong-sound" src="wrong-answer.mp3"></audio>
+  <audio id="completion-sound" src="completion-sound.mp3"></audio>
+
+<script>
+ const questions = [
+
+ {
+    "number": 1,
+    "question": "أول تعداد شامل في سلطنة عُمان في العام الميلادي",
+    "choices": ["1990 م", "1991 م", "1992 م", "1993 م"],
+    "correct": 3,
+    "image": "",
+    "answer": "1993 م"
+  },
+  {
+    "number": 2,
+    "question": "العلم الذي يهتم بدراسة حجم السكان وخصائصهم من حيث البنى العمرية والنوعية والاقتصادية والاجتماعية",
+    "choices": ["جغرافية السكان", "التعداد السكاني", "المسوحات بالعينة", "التسجيل الحيوي"],
+    "correct": 0,
+    "image": "",
+    "answer": "جغرافية السكان"
+  },
+  {
+    "number": 3,
+    "question": "جميع ما يلي من المصادر الثانوية للبيانات السكانية ما عدا",
+    "choices": ["سجلات المدارس", "سجلات المؤسسات الحكومية", "التسجيل الحيوي", "سجلات المؤسسات الأهلية"],
+    "correct": 2,
+    "image": "",
+    "answer": "التسجيل الحيوي"
+  },
+  {
+    "number": 4,
+    "question": "يُعد من أهم المصادر الأساسية لدراسة الخصائص والتغيرات السكانية في أي مجتمع",
+    "choices": ["التعداد السكاني", "المسوحات بالعينة", "التسجيل الحيوي", "سجلات المدارس"],
+    "correct": 0,
+    "image": "",
+    "answer": "التعداد السكاني"
+  },
+  {
+    "number": 5,
+    "question": "يُعد الزواج والطلاق والترمل ونقل مكان الإقامة مثالًا على",
+    "choices": ["المسح بالعينة", "التسجيل الحيوي", "البنية العمرية", "البنية الاقتصادية"],
+    "correct": 1,
+    "image": "",
+    "answer": "التسجيل الحيوي"
+  },
+  {
+    "number": 6,
+    "question": "يُعرف الوقت المحدد الذي يتم فيه جمع بيانات التعداد السكاني لجميع مفردات المجتمع",
+    "choices": ["الهرم السكاني", "النمو السكاني", "الإسناد الزمني", "الانتقال السكاني"],
+    "correct": 2,
+    "image": "",
+    "answer": "الإسناد الزمني"
+  },
+  {
+    "number": 7,
+    "question": "الكثافة السكانية التي تتجاوز 100 نسمة لكل كم² تُعد كثافة",
+    "choices": ["مرتفعة جدًا", "مرتفعة", "متوسطة", "منخفضة"],
+    "correct": 0,
+    "image": "",
+    "answer": "مرتفعة جدًا"
+  },
+  {
+    "number": 8,
+    "question": "جميع ما يلي من العوامل الطبيعية التي تؤثر في توزيع السكان ما عدا",
+    "choices": ["المناخ", "الموقع", "التضاريس", "الهجرة"],
+    "correct": 3,
+    "image": "",
+    "answer": "الهجرة"
+  },
+  {
+    "number": 9,
+    "question": "السنة التي جرى فيها تعداد سابق للتعداد السكاني الأخير تُعرف بـ",
+    "choices": ["سنة الميلاد", "سنة الأساس", "الإسناد الزمني", "الهجرة"],
+    "correct": 1,
+    "image": "",
+    "answer": "سنة الأساس"
+  },
+  {
+    "number": 10,
+    "question": "الفرق بين المواليد والوفيات يُعرف بـ",
+    "choices": ["المواليد الخام", "الوفيات الخام", "الزيادة الطبيعية", "صافي الهجرة"],
+    "correct": 2,
+    "image": "",
+    "answer": "الزيادة الطبيعية"
+  },
+  {
+    "number": 11,
+    "question": "القائد البرتغالي الذي أخضع الساحل الشرقي للسيطرة البرتغالية عام 1501 م",
+    "choices": ["فاسكو دي جاما", "جيمس كوك", "ماجلان", "البوكيرك"],
+    "correct": 3,
+    "image": "",
+    "answer": "البوكيرك"
+  },
+  {
+    "number": 12,
+    "question": "جميع الهجرات التالية خرجت من شبه الجزيرة العربية إلى شرقي أفريقيا ما عدا",
+    "choices": ["أولاد الجلندي", "الشيرازيين", "أهل الأحساء", "سليمان النبهاني"],
+    "correct": 1,
+    "image": "",
+    "answer": "الشيرازيين"
+  },
+  {
+    "number": 13,
+    "question": "هاجر أولاد الجلندى من عُمان إلى شرقي أفريقيا في القرن الهجري",
+    "choices": ["الأول", "الثاني", "الثالث", "الرابع"],
+    "correct": 0,
+    "image": "",
+    "answer": "الأول"
+  },
+  {
+    "number": 14,
+    "question": "توفي السيد سعيد بن سلطان وهو عائد من مسقط على ظهر السفينة",
+    "choices": ["صحار", "سلطانة", "فيكتوريا", "الهوري"],
+    "correct": 2,
+    "image": "",
+    "answer": "فيكتوريا"
+  },
+  {
+    "number": 15,
+    "question": "كان الأسطول البحري العُماني يُعد من أقوى الأساطيل على طول الساحل الممتد من رأس الرجاء الصالح حتى",
+    "choices": ["إندونيسيا", "الصين", "اليابان", "الفلبين"],
+    "correct": 2,
+    "image": "",
+    "answer": "اليابان"
+  },
+ {
+    "number": 16,
+    "question": "كانت أقوى الدوافع التي جعلت السيد سعيد بن سلطان يُفضل الإقامة في زنجبار",
+    "choices": ["الدافع الاقتصادي", "الدافع الديني", "الدافع الاجتماعي", "الدافع السياسي"],
+    "correct": 0,
+    "image": "",
+    "answer": "الدافع الاقتصادي"
+  },
+  {
+    "number": 17,
+    "question": "أبحر السيد أحمد بن نعمان الكعبي على ميناء نيويورك عام 1840 م على ظهر السفينة",
+    "choices": ["فيكتوريا", "صحار", "سلطانة", "الغنجة"],
+    "correct": 2,
+    "image": "",
+    "answer": "سلطانة"
+  },
+  {
+    "number": 18,
+    "question": "من أهم المستشارين المساعدين للسيد سعيد بن سلطان وتم تعيينه رئيسًا للوزراء في زنجبار السيد",
+    "choices": ["حمد بن سليمان البوسعيدي", "أحمد الكعبي", "سليمان بن حمد البوسعيدي", "حسن الفارسي"],
+    "correct": 2,
+    "image": "",
+    "answer": "سليمان بن حمد البوسعيدي"
+  },
+  {
+    "number": 19,
+    "question": "من أهم الأنهار وأكبرها في جزيرة زنجبار نهر",
+    "choices": ["النيل", "النيجر", "مويرا", "شبيلي"],
+    "correct": 2,
+    "image": "",
+    "answer": "مويرا"
+  },
+  {
+    "number": 20,
+    "question": "الحرفة السائدة الرئيسة التي يعمل بها سكان زنجبار",
+    "choices": ["الصناعة", "التجارة", "الزراعة", "الرعي"],
+    "correct": 2,
+    "image": "",
+    "answer": "الزراعة"
+  },
+  {
+    "number": 21,
+    "question": "الشخصية العُمانية الذي اشتهر صيته في المصادر الأجنبية وأسس إمارة عربية في أعالي الكونغو",
+    "choices": ["سليمان بن حمد البوسعيدي", "حميد بن محمد المرجبي", "أحمد الكعبي", "حسن الفارسي"],
+    "correct": 1,
+    "image": "",
+    "answer": "حميد بن محمد المرجبي"
+  },
+  {
+    "number": 22,
+    "question": "من المحاصيل الزراعية في زنجبار وأصبحت الثروة الرئيسة فيها",
+    "choices": ["المانجو", "القرنفل", "الذرة", "البرتقال"],
+    "correct": 1,
+    "image": "",
+    "answer": "القرنفل"
+  },
+  {
+    "number": 23,
+    "question": "تخيل أنك قائد سفينة تجارية محملة ببضائع قدرها ( 2000 ريال ) متجهًا إلى الموانئ الأفريقية في عهد السيد سعيد بن سلطان فإنك ستدفع ضرائب قدرها",
+    "choices": ["10 ريال", "50 ريال", "80 ريال", "100 ريال"],
+    "correct": 3,
+    "image": "",
+    "answer": "100 ريال"
+  },
+  {
+    "number": 24,
+    "question": "شاركت سلطنة عُمان منذ السنوات الأولى في الفتوحات الإسلامية برًا لا سيما في",
+    "choices": ["شرقي أفريقيا", "العراق", "الصين", "الموانئ الآسيوية"],
+    "correct": 1,
+    "image": "",
+    "answer": "العراق"
+  },
+  {
+    "number": 25,
+    "question": "تضم منظمة المؤتمر الإسلامي عددًا من الدول الإسلامية يبلغ عددها",
+    "choices": ["50 دولة", "55 دولة", "57 دولة", "60 دولة"],
+    "correct": 2,
+    "image": "",
+    "answer": "57 دولة"
+  },
+  {
+    "number": 26,
+    "question": "عُقد أول مؤتمر قمة إسلامية من مجموعة من الدول الإسلامية في",
+    "choices": ["الرباط", "مكة المكرمة", "جدة", "بغداد"],
+    "correct": 0,
+    "image": "",
+    "answer": "الرباط"
+  },
+  {
+    "number": 27,
+    "question": "استضافت سلطنة عُمان الاجتماع الوزاري لرابطة الدول المطلة على المحيط الهندي للتعاون الإقليمي في إبريل عام",
+    "choices": ["2000 م", "2001 م", "2002 م", "2003 م"],
+    "correct": 1,
+    "image": "",
+    "answer": "2001 م"
+  },
+{
+  "number": 28,
+  "question": "انضمت سلطنة عُمان لمشروع شبكة المدارس المنتسبة لليونسكو في أغسطس 1998 م بعدد",
+  "choices": ["مدرسة واحدة ثانوية", "مدرستين ثانويتين", "ثلاث مدارس ثانوية", "أربع مدارس ثانوية"],
+  "correct": 1,
+  "image": "",
+  "answer": "مدرستين ثانويتين"
+},
+  {
+    "number": 29,
+    "question": "أُنشئت جائزة السلطان قابوس – طيب الله ثراه – لصون البيئة عام 1989 م وهي تُمنح كل",
+    "choices": ["عام", "عامين", "ثلاثة أعوام", "أربعة أعوام"],
+    "correct": 1,
+    "image": "",
+    "answer": "عامين"
+  },
+  {
+    "number": 30,
+    "question": "من أهم أجهزة الأمم المتحدة ومن أهم اختصاصاته حفظ الأمن والسلام الدوليين واستخدام القوة لإعادة السلم بين الدول",
+    "choices": ["منظمة الصحة العالمية", "منظمة العمل الدولية", "اليونسكو", "مجلس الأمن"],
+    "correct": 3,
+    "image": "",
+    "answer": "مجلس الأمن"
+  }
+
+];
+
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let userAnswers = [];
+
+
+  function startQuiz() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('quiz-container').style.display = 'block';
+    loadQuestion();
+  }
+
+function loadQuestion() {
+
+    const questionElement = document.getElementById('question');
+    const choicesContainer = document.getElementById('choices');
+    const questionImage = document.getElementById('question-image'); 
+    const currentQuestionInfo = document.getElementById('current-question-info');
+    
+    const question = questions[currentQuestionIndex];
+
+
+    // عرض السؤال
+    questionElement.textContent = question.question;
+
+    // التحقق من وجود الصورة وتحديثها
+    if (question.image && question.image.trim() !== "") {
+        questionImage.src = question.image; // ضبط مصدر الصورة
+        questionImage.onload = () => {
+            questionImage.style.display = 'block'; // إظهار الصورة عند تحميلها بنجاح
+        };
+        questionImage.onerror = () => {
+            questionImage.style.display = 'none'; // إخفاء الصورة إذا فشل تحميلها
+        };
+    } else {
+        questionImage.style.display = 'none'; // إخفاء الصورة إذا لم توجد
+    }
+
+    // إعادة تعيين خيارات الإجابة
+    choicesContainer.innerHTML = '';
+    question.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.classList.add('choice-button'); 
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+
+    // تحديث معلومات السؤال الحالي
+    currentQuestionInfo.textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+}
+
+
+  function selectAnswer(index) {
+    const correctIndex = questions[currentQuestionIndex].correct;
+    const buttons = document.querySelectorAll('#choices button');
+    buttons.forEach(button => {
+      button.disabled = true; // تعطيل الأزرار بعد الإجابة
+      if (button.textContent === questions[currentQuestionIndex].choices[correctIndex]) {
+        button.classList.add('correct');
+      }
+    });
+
+    if (index === correctIndex) {
+      score++;
+      document.getElementById('correct-sound').play(); // تشغيل الصوت الصحيح
+    } else {
+      buttons[index].classList.add('wrong');
+      document.getElementById('wrong-sound').play(); // تشغيل الصوت الخاطئ
+    }
+
+    userAnswers[currentQuestionIndex] = questions[currentQuestionIndex].choices[index];
+
+    // إظهار زر التالي فقط بعد اختيار الإجابة
+    document.getElementById('next-button').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    if (userAnswers[currentQuestionIndex] === undefined) {  // التحقق إذا لم يتم اختيار الإجابة
+        alert("من فضلك اختر إجابة قبل الانتقال للسؤال التالي.");
+        return; // لا تنتقل للسؤال التالي إلا بعد اختيار إجابة
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+      document.getElementById('next-button').classList.add('hidden');
+    } else {
+      showResult();
+      document.getElementById('completion-sound').play(); // تشغيل الصوت عند اكتمال الأسئلة
+    }
+}
+
+
+  function showResult() {
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('result-popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('final-score').textContent = score;
+
+    let summary = "أنت لم تكمل جميع الأسئلة!";
+    let detailedSummary = "";
+
+ 
+    document.getElementById('summary').textContent = `إجمالي النقاط: ${score} من ${questions.length}`;
+    document.getElementById('detailed-summary').innerHTML = detailedSummary;
+  }
+
+  function restartQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    userAnswers = [];
+    document.getElementById('result-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('welcome-screen').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>
+
