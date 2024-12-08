@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> اختبار تفاعلي في مادة الاحياء  _ الصف التاسع _ الفصل الدراسي الأول</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #quiz-container {
+      width: 95%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+  #choices button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #choices button:hover {
+      background-color: #0056b3;
+    }
+
+    #choices button.correct {
+      background-color: #28a745;
+    }
+
+    #choices button.wrong {
+      background-color: #dc3545;
+    }
+
+    #next-button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #next-button:hover {
+      background-color: #218838;
+    }
+
+    #next-button.hidden {
+      display: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+
+    #result-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #result-popup .circle {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      border: 4px solid #007BFF;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      line-height: 120px;
+      font-size: 1.6em;
+      color: #007BFF;
+    }
+
+   #retry-button {
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #retry-button:hover {
+      background-color: #218838;
+    }
+
+    /* شاشة الترحيب */
+   #welcome-screen {
+  background-image: url('face.jpg'); /* اسم الصورة هنا */
+  background-size: contain; /* جعل الصورة تتناسب مع المساحة ولكن مع الحفاظ على نسبتها */
+  background-position: center; /* لضبط الصورة في منتصف الشاشة */
+  background-repeat: no-repeat; /* لمنع تكرار الصورة */
+  width: 100%;
+  height: 100vh; /* ملء الشاشة بالكامل */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* النص باللون الأبيض لضمان وضوحه */
+  text-align: center;
+}
+
+
+    #welcome-screen button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #welcome-screen button:hover {
+      background-color: #218838;
+    }
+
+    /* تنسيق السؤال */
+    #question-container {
+      background-color: #e0f7fa;
+      padding: 20px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question-image {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* تنسيق نتائج الأسئلة */
+    .question-summary {
+      text-align: left;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .correct-answer {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .wrong-answer {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .user-answer {
+      font-weight: bold;
+    }
+
+    .incorrect-user-answer {
+      color: #dc3545;
+    }
+
+    /* لرقم السؤال الحالي */
+    #current-question-info {
+      font-size: 1.1em;
+      margin-top: 20px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    /* سكرول بار للتفاصيل */
+    #detailed-summary {
+      max-height: 300px; /* يمكنك تعديل الارتفاع حسب احتياجك */
+      overflow-y: auto;
+      padding-right: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+ <!-- شاشة الترحيب -->
+<div id="welcome-screen">
+  <div style="position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <img src="welcome-image.jpg" alt="صورة ترحيبية" style="width: 100px; height: auto; position: absolute; top: 10px; right: 140px;">
+       
+    <!-- صندوق النص -->
+    <div style="margin-top: -100px; padding: 20px; border: 2px solid #333; border-radius: 10px; background-color: rgba(255, 255, 255, 0.5); width: 70%; text-align: center;">
+      <div style="font-size: 24px; font-weight: bold; color: #333;">
+  <br>
+     اختبار تفاعلي في <span style="color: #000; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">مادة الاحياء </span><br>
+الفصل الدراسي الأول
+      </div>
+      <div style="font-size: 18px; color: #333; margin-top: 10px;">
+     <span style="font-size: 30px; color: #006400; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">الصف التاسع</span>
+      </div>
+      <div style="font-size: 0.8em; color: #003366; margin-top: 20px;">
+        اعداد الأسئلة : أ.أحمد الفارسي<br>
+        تصميم وبرمجة : أ.طلال المحرزي<br>
+    ولاية بركاء<br>
+        <a href="mailto:surmad7@gmail.com" style="color: #003366;">surmad7@gmail.com</a><br>
+      </div>
+    </div>
+
+    <button onclick="startQuiz()" style="position: absolute; bottom: 20px; left: 140px;">دخول</button>
+  </div>
+</div>
+
+
+<!-- نافذة الأسئلة -->
+<div id="quiz-container" style="display: none;">
+  <div id="question-container" style="text-align: center; margin-bottom: 20px;">
+    <img id="question-image" src="" alt="سؤال صورة" style="display:none; width: 50%; max-width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19); border-radius: 10px; margin: 10px auto;">
+    <br>
+    <div id="question" style="font-size: 24px; font-weight: bold; color: #333;">سؤال</div>
+  </div>
+  <div id="choices"></div>
+  <button id="next-button" onclick="nextQuestion()">التالي</button>
+  <div id="current-question-info" style="margin-top: 10px; font-size: 18px; color: #555;">السؤال 1 من 3</div>
+</div>
+
+  <div id="overlay"></div>
+  <div id="result-popup">
+    <div class="circle" id="final-score">0</div>
+    <p id="summary"></p>
+    <div id="summary-container">
+      <div id="detailed-summary"></div>
+    </div>
+    <button id="retry-button" onclick="restartQuiz()">إعادة المحاولة</button>
+  </div>
+
+  <!-- أصوات -->
+  <audio id="correct-sound" src="correct-answer.mp3"></audio>
+  <audio id="wrong-sound" src="wrong-answer.mp3"></audio>
+  <audio id="completion-sound" src="completion-sound.mp3"></audio>
+
+<script>
+ const questions = [
+
+  {
+    "number": 1,
+    "question": "يوضح الشكل المقابل أحد خصائص الكائنات الحية، اختر من البدائل المعطاة أي خاصية يمثل الشكل",
+    "choices": ["الحركة", "التنفس", "التكاثر", "النمو"],
+    "correct": 2,
+    "image": "1.jpg",
+    "answer": "التكاثر"
+  },
+  {
+    "number": 2,
+    "question": "عند وضع خلية نباتية داخل محلول عالي التركيز فإن أحد الخيارات التالية من المتوقع أن تحصل، اختر ما تتوقع حصوله",
+    "choices": ["تنكمش", "تتبلزم", "تتفخ وتصبح صلبة", "تنفجر"],
+    "correct": 1,
+    "image": "2.jpg",
+    "answer": "تتبلزم"
+  },
+  {
+    "number": 3,
+    "question": "خلية متخصصة تلعب دور هام في إخراج الإفرازات المخاطية من القصبة الهوائية",
+    "choices": ["خلية الشعيرة الجذرية", "الخلية المخاطية", "خلية الحيوان المنوي", "الخلية الهدبية"],
+    "correct": 3,
+    "image": "",
+    "answer": "الخلية الهدبية"
+  },
+  {
+    "number": 4,
+    "question": "خلية متخصصة لها أهمية في نقل الأكسجين خلال الجسم هي",
+    "choices": ["خلية الدم الحمراء", "الخلايا الهدبية", "خلية البويضة", "خلايا الطبقة العمادية الوسطى"],
+    "correct": 0,
+    "image": "",
+    "answer": "خلية الدم الحمراء"
+  },
+  {
+    "number": 5,
+    "question": "عضية في الخلية مسؤولة عن التحكم بما يدخل ويخرج من الخلية",
+    "choices": ["الجدار الخلوي", "غشاء الخلية", "النواة", "السيتوبلازم"],
+    "correct": 1,
+    "image": "",
+    "answer": "غشاء الخلية"
+  },
+  {
+    "number": 6,
+    "question": "كمية جزيئات الماء الحرة الموجودة داخل محلول، مفهوم لأحد المصطلحات التالية",
+    "choices": ["الأسموزية", "منحدر التركيز", "جهد الماء", "الضغط"],
+    "correct": 2,
+    "image": "",
+    "answer": "جهد الماء"
+  },
+  {
+    "number": 7,
+    "question": " ",
+    "choices": ["0.002mm", "40mm", "80mm", "500mm"],
+    "correct": 2,
+    "image": "7.jpg",
+    "answer": "80mm"
+  },
+  {
+    "number": 8,
+    "question": "يمثل الشكل الآتي عمل الأنزيم. ماذا تمثل الأجزاء (W و X و Y) في هذا التفاعل الكيميائي؟",
+    "choices": ["أ", "ب", "ج", "د"],
+    "correct": 1,
+    "image": "8.jpg",
+    "answer": "ب"
+  },
+  {
+    "number": 9,
+    "question": "أبسط أنواع الكربوهيدرات هو",
+    "choices": ["سكروز", "مالتوز", "جلايكوجين", "جلوكوز"],
+    "correct": 3,
+    "image": "",
+    "answer": "جلوكوز"
+  },
+  {
+    "number": 10,
+    "question": "أي نوع من الكربوهيدرات يُستخدم كمصدر سريع للطاقة في الكائنات الحية؟",
+    "choices": ["السليلوز", "الجلايكوجين", "الجلوكوز", "النشا"],
+    "correct": 2,
+    "image": "",
+    "answer": "الجلوكوز"
+  },
+  {
+    "number": 11,
+    "question": "أي من الآتي يُعد سكرًا مختزلًا؟",
+    "choices": ["السليلوز", "المالتوز", "النشا", "الجلايكوجين"],
+    "correct": 1,
+    "image": "",
+    "answer": "المالتوز"
+  },
+  {
+    "number": 12,
+    "question": "ما هي الوظيفة الأساسية للدهون في الكائنات الحية؟",
+    "choices": ["إنتاج الطاقة السريعة مثل الجلوكوز", "تخزين الطاقة لفترات طويلة", "بناء جدران الخلايا", "تنظيم العمليات الحيوية"],
+    "correct": 1,
+    "image": "",
+    "answer": "تخزين الطاقة لفترات طويلة"
+  },
+  {
+    "number": 13,
+    "question": "في الشكل الآتي يوضح نوع من أنواع السكريات. ما الذي ترمز إليه الأرقام؟",
+    "choices": ["جزيئات النشا", "جزيئات السليلوز", "جزيئات الجلوكوز", "جزيئات السكروز"],
+    "correct": 2,
+    "image": "13.jpg",
+    "answer": "جزيئات الجلوكوز"
+  },
+  {
+    "number": 14,
+    "question": "يمثل الشكل المقابل تركيب جزيء الدهن، فهو يتكون من",
+    "choices": ["3 أحماض أمينية و 2 جليسرول", "3 أحماض دهنية و 2 جليسرول", "3 أحماض أمينية و 1 جليسرول", "3 أحماض دهنية و 1 جليسرول"],
+    "correct": 3,
+    "image": "14.jpg",
+    "answer": "3 أحماض دهنية و 1 جليسرول"
+  },
+  {
+    "number": 15,
+    "question": "نوع الخلايا العصبية التي تقوم بتوصيل الأوامر من الجهاز العصبي المركزي إلى عضو الاستجابة",
+    "choices": ["جسم الخلية", "خلية عصبية حسية", "خلية عصبية حركية", "خلية حسية موصلة"],
+    "correct": 3,
+    "image": "",
+    "answer": "خلية حسية موصلة"
+  },
+ {
+    "number": 16,
+    "question": "لديك مخطط يبين مستوى تركيز هرمون الأدرينالين في دم ثلاثة أشخاص (س، ص، ع). تعرضوا لمواقف مختلفة. أحدهم كان يلعب لعبة قطار الملاهي السريع. حدد رمز الشخص الذي تعرض لهذا الموقف",
+    "choices": ["س", "ص", "ع"],
+    "correct": 2,
+    "image": "16.jpg",
+    "answer": "ع"
+  },
+  {
+    "number": 17,
+    "question": "  ",
+    "choices": ["الكساح", "الأسقربوط", "هشاشة العظام", "ضعف تخثر الدم"],
+    "correct": 1,
+    "image": "17.jpg",
+    "answer": "الأسقربوط"
+  },
+  {
+    "number": 18,
+    "question": "ما المادة الغذائية التي تسبب مرض القلب التاجي عند تناولها بكثرة؟",
+    "choices": ["البروتينات", "الألياف", "الكربوهيدرات", "الدهون"],
+    "correct": 3,
+    "image": "",
+    "answer": "الدهون"
+  },
+  {
+    "number": 19,
+    "question": "أي المواد التالية تمنع الإمساك؟",
+    "choices": ["البروتينات", "الألياف", "الكربوهيدرات", "الدهون"],
+    "correct": 1,
+    "image": "",
+    "answer": "الألياف"
+  },
+  {
+    "number": 20,
+    "question": "ما المادة التي تسبب تعكر ماء الجير عند إضافة الخمير إلى السكر لمدة من الوقت؟",
+    "choices": ["ثاني أكسيد الكربون", "الأكسجين", "حمض اللبنيك", "الكحول الإيثيلي"],
+    "correct": 0,
+    "image": "",
+    "answer": "ثاني أكسيد الكربون"
+  }
+];
+
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let userAnswers = [];
+
+
+  function startQuiz() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('quiz-container').style.display = 'block';
+    loadQuestion();
+  }
+
+function loadQuestion() {
+
+    const questionElement = document.getElementById('question');
+    const choicesContainer = document.getElementById('choices');
+    const questionImage = document.getElementById('question-image'); 
+    const currentQuestionInfo = document.getElementById('current-question-info');
+    
+    const question = questions[currentQuestionIndex];
+
+
+    // عرض السؤال
+    questionElement.textContent = question.question;
+
+    // التحقق من وجود الصورة وتحديثها
+    if (question.image && question.image.trim() !== "") {
+        questionImage.src = question.image; // ضبط مصدر الصورة
+        questionImage.onload = () => {
+            questionImage.style.display = 'block'; // إظهار الصورة عند تحميلها بنجاح
+        };
+        questionImage.onerror = () => {
+            questionImage.style.display = 'none'; // إخفاء الصورة إذا فشل تحميلها
+        };
+    } else {
+        questionImage.style.display = 'none'; // إخفاء الصورة إذا لم توجد
+    }
+
+    // إعادة تعيين خيارات الإجابة
+    choicesContainer.innerHTML = '';
+    question.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.classList.add('choice-button'); 
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+
+    // تحديث معلومات السؤال الحالي
+    currentQuestionInfo.textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+}
+
+
+  function selectAnswer(index) {
+    const correctIndex = questions[currentQuestionIndex].correct;
+    const buttons = document.querySelectorAll('#choices button');
+    buttons.forEach(button => {
+      button.disabled = true; // تعطيل الأزرار بعد الإجابة
+      if (button.textContent === questions[currentQuestionIndex].choices[correctIndex]) {
+        button.classList.add('correct');
+      }
+    });
+
+    if (index === correctIndex) {
+      score++;
+      document.getElementById('correct-sound').play(); // تشغيل الصوت الصحيح
+    } else {
+      buttons[index].classList.add('wrong');
+      document.getElementById('wrong-sound').play(); // تشغيل الصوت الخاطئ
+    }
+
+    userAnswers[currentQuestionIndex] = questions[currentQuestionIndex].choices[index];
+
+    // إظهار زر التالي فقط بعد اختيار الإجابة
+    document.getElementById('next-button').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    if (userAnswers[currentQuestionIndex] === undefined) {  // التحقق إذا لم يتم اختيار الإجابة
+        alert("من فضلك اختر إجابة قبل الانتقال للسؤال التالي.");
+        return; // لا تنتقل للسؤال التالي إلا بعد اختيار إجابة
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+      document.getElementById('next-button').classList.add('hidden');
+    } else {
+      showResult();
+      document.getElementById('completion-sound').play(); // تشغيل الصوت عند اكتمال الأسئلة
+    }
+}
+
+
+  function showResult() {
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('result-popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('final-score').textContent = score;
+
+    let summary = "أنت لم تكمل جميع الأسئلة!";
+    let detailedSummary = "";
+
+ 
+    document.getElementById('summary').textContent = `إجمالي النقاط: ${score} من ${questions.length}`;
+    document.getElementById('detailed-summary').innerHTML = detailedSummary;
+  }
+
+  function restartQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    userAnswers = [];
+    document.getElementById('result-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('welcome-screen').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>
+
