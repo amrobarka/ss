@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> اختبار تفاعلي في مادة الدراسات الاجتماعية   _ الصف السابع _ الفصل الدراسي الأول</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #quiz-container {
+      width: 95%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+  #choices button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #choices button:hover {
+      background-color: #0056b3;
+    }
+
+    #choices button.correct {
+      background-color: #28a745;
+    }
+
+    #choices button.wrong {
+      background-color: #dc3545;
+    }
+
+    #next-button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #next-button:hover {
+      background-color: #218838;
+    }
+
+    #next-button.hidden {
+      display: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+
+    #result-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #result-popup .circle {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      border: 4px solid #007BFF;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      line-height: 120px;
+      font-size: 1.6em;
+      color: #007BFF;
+    }
+
+   #retry-button {
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #retry-button:hover {
+      background-color: #218838;
+    }
+
+    /* شاشة الترحيب */
+   #welcome-screen {
+  background-image: url('face.jpg'); /* اسم الصورة هنا */
+  background-size: contain; /* جعل الصورة تتناسب مع المساحة ولكن مع الحفاظ على نسبتها */
+  background-position: center; /* لضبط الصورة في منتصف الشاشة */
+  background-repeat: no-repeat; /* لمنع تكرار الصورة */
+  width: 100%;
+  height: 100vh; /* ملء الشاشة بالكامل */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* النص باللون الأبيض لضمان وضوحه */
+  text-align: center;
+}
+
+
+    #welcome-screen button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #welcome-screen button:hover {
+      background-color: #218838;
+    }
+
+    /* تنسيق السؤال */
+    #question-container {
+      background-color: #e0f7fa;
+      padding: 20px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question-image {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* تنسيق نتائج الأسئلة */
+    .question-summary {
+      text-align: left;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .correct-answer {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .wrong-answer {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .user-answer {
+      font-weight: bold;
+    }
+
+    .incorrect-user-answer {
+      color: #dc3545;
+    }
+
+    /* لرقم السؤال الحالي */
+    #current-question-info {
+      font-size: 1.1em;
+      margin-top: 20px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    /* سكرول بار للتفاصيل */
+    #detailed-summary {
+      max-height: 300px; /* يمكنك تعديل الارتفاع حسب احتياجك */
+      overflow-y: auto;
+      padding-right: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+ <!-- شاشة الترحيب -->
+<div id="welcome-screen">
+  <div style="position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <img src="welcome-image.jpg" alt="صورة ترحيبية" style="width: 100px; height: auto; position: absolute; top: 10px; right: 140px;">
+       
+    <!-- صندوق النص -->
+    <div style="margin-top: -100px; padding: 20px; border: 2px solid #333; border-radius: 10px; background-color: rgba(255, 255, 255, 0.5); width: 70%; text-align: center;">
+      <div style="font-size: 24px; font-weight: bold; color: #333;">
+  <br>
+     اختبار تفاعلي في <span style="color: #000; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">مادة الدراسات الاجتماعية </span><br>
+الفصل الدراسي الأول
+      </div>
+      <div style="font-size: 18px; color: #333; margin-top: 10px;">
+     <span style="font-size: 30px; color: #006400; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">الصف السابع</span>
+      </div>
+      <div style="font-size: 0.8em; color: #003366; margin-top: 20px;">
+        اعداد الأسئلة : أ.محمد الناعبي<br>
+        تصميم وبرمجة : أ.طلال المحرزي<br>
+    ولاية بركاء<br>
+        <a href="mailto:surmad7@gmail.com" style="color: #003366;">surmad7@gmail.com</a><br>
+      </div>
+    </div>
+
+    <button onclick="startQuiz()" style="position: absolute; bottom: 20px; left: 140px;">دخول</button>
+  </div>
+</div>
+
+
+<!-- نافذة الأسئلة -->
+<div id="quiz-container" style="display: none;">
+  <div id="question-container" style="text-align: center; margin-bottom: 20px;">
+    <img id="question-image" src="" alt="سؤال صورة" style="display:none; width: 100%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19); border-radius: 10px; margin: 10px auto;">
+    <br>
+    <div id="question" style="font-size: 24px; font-weight: bold; color: #333;">سؤال</div>
+  </div>
+  <div id="choices"></div>
+  <button id="next-button" onclick="nextQuestion()">التالي</button>
+  <div id="current-question-info" style="margin-top: 10px; font-size: 18px; color: #555;">السؤال 1 من 3</div>
+</div>
+
+  <div id="overlay"></div>
+  <div id="result-popup">
+    <div class="circle" id="final-score">0</div>
+    <p id="summary"></p>
+    <div id="summary-container">
+      <div id="detailed-summary"></div>
+    </div>
+    <button id="retry-button" onclick="restartQuiz()">إعادة المحاولة</button>
+  </div>
+
+  <!-- أصوات -->
+  <audio id="correct-sound" src="correct-answer.mp3"></audio>
+  <audio id="wrong-sound" src="wrong-answer.mp3"></audio>
+  <audio id="completion-sound" src="completion-sound.mp3"></audio>
+
+<script>
+ const questions = [
+
+ {
+    "number": 1,
+    "question": "الميناء الذي أصبح في عهد القتبانيون مركزًا لتجارة البخور",
+    "choices": ["صنعاء", "عدن", "مأرب", "حضرموت"],
+    "correct": 1,
+    "answer": "عدن"
+  },
+  {
+    "number": 2,
+    "question": "المضيق الذي يربط بين بحر العرب والبحر الأحمر",
+    "choices": ["باب المندب", "جبل طارق", "ملقا", "هرمز"],
+    "correct": 0,
+    "answer": "باب المندب"
+  },
+  {
+    "number": 3,
+    "question": "أكبر محافظات سلطنة عُمان من حيث المساحة",
+    "choices": ["مسقط", "الوسطى", "ظفار", "مسندم"],
+    "correct": 2,
+    "answer": "ظفار"
+  },
+  {
+    "number": 4,
+    "question": "عاصمة دولة معين",
+    "choices": ["قرناو", "تمنع", "مأرب", "ظفار"],
+    "correct": 0,
+    "answer": "قرناو"
+  },
+  {
+    "number": 5,
+    "question": "تقع مقبرة بات في محافظة",
+    "choices": ["البريمي", "الباطنة", "الظاهرة", "ظفار"],
+    "correct": 2,
+    "answer": "الظاهرة"
+  },
+  {
+    "number": 6,
+    "question": "محصول اللّبان كان يُصدّر عبر ميناء",
+    "choices": ["مسقط", "الفحل", "سمهرم", "صحار"],
+    "correct": 2,
+    "answer": "سمهرم"
+  },
+  {
+    "number": 7,
+    "question": "يحتفل العالم باليوم العالمي للغذاء في",
+    "choices": ["14 أكتوبر", "15 أكتوبر", "16 أكتوبر", "17 أكتوبر"],
+    "correct": 2,
+    "answer": "16 أكتوبر"
+  },
+  {
+    "number": 8,
+    "question": "جميع ما يلي تعد موارد متجددة ما عدا",
+    "choices": ["الرياح", "التربة", "المعادن", "الماء"],
+    "correct": 2,
+    "answer": "المعادن"
+  },
+  {
+    "number": 9,
+    "question": "الحضارة التي أطلقت اسم مجان على عُمان",
+    "choices": ["الفرس", "الآشوريون", "السومريون", "الأكاديون"],
+    "correct": 2,
+    "answer": "السومريون"
+  },
+  {
+    "number": 10,
+    "question": "الفرق بين المواليد والوفيات يُعرف بـ",
+    "choices": ["المواليد الخام", "الوفيات الخام", "الزيادة الطبيعية", "صافي الهجرة"],
+    "correct": 2,
+    "answer": "الزيادة الطبيعية"
+  },
+  {
+    "number": 11,
+    "question": "الحضارة التي استخدمت اللّبان في تحنيط جثث الموتى",
+    "choices": ["الفراعنة", "الرومان", "اليونان", "المسلمون"],
+    "correct": 0,
+    "answer": "الفراعنة"
+  },
+  {
+    "number": 12,
+    "question": "المدينة التي اتخذها الفرس مركزًا لتجارتهم في عُمان",
+    "choices": ["صور", "صحار", "بركاء", "مسقط"],
+    "correct": 1,
+    "answer": "صحار"
+  },
+  {
+    "number": 13,
+    "question": "العامل الرئيس الذي جعل الفرس يتخذون صحار مركزًا لتجارتهم",
+    "choices": ["مساحتها", "مناخها", "موقعها", "سكانها"],
+    "correct": 2,
+    "answer": "موقعها"
+  },
+  {
+    "number": 14,
+    "question": "نبي الله عليه السلام الذي أمر أخاه بتبخير المصلين باللّبان",
+    "choices": ["عيسى", "يونس", "نوح", "موسى"],
+    "correct": 3,
+    "answer": "موسى"
+  },
+  {
+    "number": 15,
+    "question": "الحضارة التي أطلقت على عُمان سفن الناس",
+    "choices": ["الآشوريون", "الأكاديون", "البابليون", "السومريون"],
+    "correct": 0,
+    "answer": "الآشوريون"
+  },
+ {
+    "number": 16,
+    "question": "عرف إنسان الوطن العربي القديم الكتابة خلال الألف ......قبل الميلاد",
+    "choices": ["الأولى", "الثانية", "الثالثة", "الرابعة"],
+    "correct": 3,
+    "answer": "الرابعة"
+  },
+  {
+    "number": 17,
+    "question": "يتركز في قارات العالم القديم ............. سكان العالم",
+    "choices": ["1/4", "2/4", "3/4", "1/2"],
+    "correct": 2,
+    "answer": "3/4"
+  },
+  {
+    "number": 18,
+    "question": "الوقود المستخدم في عملية صهر النحاس",
+    "choices": ["البترول", "اليورانيوم", "البنزين", "فحم الخشب"],
+    "correct": 3,
+    "answer": "فحم الخشب"
+  },
+  {
+    "number": 19,
+    "question": "عدد المواقع الأثرية التي تم اكتشافها للنحاس",
+    "choices": ["30", "31", "32", "33"],
+    "correct": 2,
+    "answer": "32"
+  },
+  {
+    "number": 20,
+    "question": "جميع الحضارات التالية قامت خارج الوطن العربي عدا",
+    "choices": ["أم النار", "اليونانية", "الرومانية", "الفرس"],
+    "correct": 0,
+    "answer": "أم النار"
+  },
+  {
+    "number": 21,
+    "question": "استخدام الإنسان للطوب في البناء يعود إلى العصر",
+    "choices": ["الحجري القديم", "الحجري الحديث", "الحديدي", "البرونزي"],
+    "correct": 3,
+    "answer": "البرونزي"
+  },
+  {
+    "number": 22,
+    "question": "المسطح المائي الذي قامت عليه حضارة دلمون",
+    "choices": ["بحر العرب", "الخليج العربي", "البحر الأحمر", "المحيط الهندي"],
+    "correct": 1,
+    "answer": "الخليج العربي"
+  },
+  {
+    "number": 23,
+    "question": "الحضارة التي أطلقت على اليمن اسم (اليمن الخضراء)",
+    "choices": ["اليونان", "الرومان", "العرب", "الفرس"],
+    "correct": 2,
+    "answer": "العرب"
+  },
+  {
+    "number": 24,
+    "question": "الحضارة التي أطلقت على عُمان اسم مزون",
+    "choices": ["اليونان", "الفرس", "الرومان", "الفراعنة"],
+    "correct": 1,
+    "answer": "الفرس"
+  },
+  {
+    "number": 25,
+    "question": "يعود الفضل في اتساع رقعة الأراضي الزراعية في الحضارة القديمة لاكتشاف",
+    "choices": ["الفضة", "الحديد", "البرونز", "النحاس"],
+    "correct": 1,
+    "answer": "الحديد"
+  },
+  {
+    "number": 26,
+    "question": "اُستخدمت بدلاً من نظام المقايضة في العصر الحديدي",
+    "choices": ["الكتابة", "الفخاريات", "النقود", "المعادن"],
+    "correct": 2,
+    "answer": "النقود"
+  },
+  {
+    "number": 27,
+    "question": "أعظم إنجاز حققه الإنسان في العصر الحجري القديم هو",
+    "choices": ["اكتشاف النار", "تربية الحيوانات", "معرفة الزراعة", "اكتشاف النحاس"],
+    "correct": 0,
+    "answer": "اكتشاف النار"
+  },
+  {
+    "number": 28,
+    "question": "أطلق اليونان على البحرين اسم",
+    "choices": ["تايلوس", "أوال", "مزون", "مجان"],
+    "correct": 0,
+    "answer": "تايلوس"
+  },
+  {
+    "number": 29,
+    "question": "تقع نماذج الفخار في حضارة كولي في دولة",
+    "choices": ["الرومان", "الهند", "باكستان", "إيران"],
+    "correct": 2,
+    "answer": "باكستان"
+  },
+  {
+    "number": 30,
+    "question": "افتقار الغذاء للعناصر الغذائية المطلوبة للجسم يُقصد به",
+    "choices": ["التلوث", "حلقة الفقر", "مشكلة الجوع", "سوء التغذية"],
+    "correct": 3,
+    "answer": "سوء التغذية"
+  }
+
+
+
+];
+
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let userAnswers = [];
+
+
+  function startQuiz() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('quiz-container').style.display = 'block';
+    loadQuestion();
+  }
+
+function loadQuestion() {
+
+    const questionElement = document.getElementById('question');
+    const choicesContainer = document.getElementById('choices');
+    const questionImage = document.getElementById('question-image'); 
+    const currentQuestionInfo = document.getElementById('current-question-info');
+    
+    const question = questions[currentQuestionIndex];
+
+
+    // عرض السؤال
+    questionElement.textContent = question.question;
+
+    // التحقق من وجود الصورة وتحديثها
+    if (question.image && question.image.trim() !== "") {
+        questionImage.src = question.image; // ضبط مصدر الصورة
+        questionImage.onload = () => {
+            questionImage.style.display = 'block'; // إظهار الصورة عند تحميلها بنجاح
+        };
+        questionImage.onerror = () => {
+            questionImage.style.display = 'none'; // إخفاء الصورة إذا فشل تحميلها
+        };
+    } else {
+        questionImage.style.display = 'none'; // إخفاء الصورة إذا لم توجد
+    }
+
+    // إعادة تعيين خيارات الإجابة
+    choicesContainer.innerHTML = '';
+    question.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.classList.add('choice-button'); 
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+
+    // تحديث معلومات السؤال الحالي
+    currentQuestionInfo.textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+}
+
+
+  function selectAnswer(index) {
+    const correctIndex = questions[currentQuestionIndex].correct;
+    const buttons = document.querySelectorAll('#choices button');
+    buttons.forEach(button => {
+      button.disabled = true; // تعطيل الأزرار بعد الإجابة
+      if (button.textContent === questions[currentQuestionIndex].choices[correctIndex]) {
+        button.classList.add('correct');
+      }
+    });
+
+    if (index === correctIndex) {
+      score++;
+      document.getElementById('correct-sound').play(); // تشغيل الصوت الصحيح
+    } else {
+      buttons[index].classList.add('wrong');
+      document.getElementById('wrong-sound').play(); // تشغيل الصوت الخاطئ
+    }
+
+    userAnswers[currentQuestionIndex] = questions[currentQuestionIndex].choices[index];
+
+    // إظهار زر التالي فقط بعد اختيار الإجابة
+    document.getElementById('next-button').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    if (userAnswers[currentQuestionIndex] === undefined) {  // التحقق إذا لم يتم اختيار الإجابة
+        alert("من فضلك اختر إجابة قبل الانتقال للسؤال التالي.");
+        return; // لا تنتقل للسؤال التالي إلا بعد اختيار إجابة
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+      document.getElementById('next-button').classList.add('hidden');
+    } else {
+      showResult();
+      document.getElementById('completion-sound').play(); // تشغيل الصوت عند اكتمال الأسئلة
+    }
+}
+
+
+  function showResult() {
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('result-popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('final-score').textContent = score;
+
+    let summary = "أنت لم تكمل جميع الأسئلة!";
+    let detailedSummary = "";
+
+ 
+    document.getElementById('summary').textContent = `إجمالي النقاط: ${score} من ${questions.length}`;
+    document.getElementById('detailed-summary').innerHTML = detailedSummary;
+  }
+
+  function restartQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    userAnswers = [];
+    document.getElementById('result-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('welcome-screen').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>
+
