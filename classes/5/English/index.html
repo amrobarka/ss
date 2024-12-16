@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> اختبار تفاعلي في مادة اللغة الإنجليزية    _ الصف الخامس _ الفصل الدراسي الأول</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #quiz-container {
+      width: 95%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+  #choices button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #choices button:hover {
+      background-color: #0056b3;
+    }
+
+    #choices button.correct {
+      background-color: #28a745;
+    }
+
+    #choices button.wrong {
+      background-color: #dc3545;
+    }
+
+    #next-button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #next-button:hover {
+      background-color: #218838;
+    }
+
+    #next-button.hidden {
+      display: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+
+    #result-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #result-popup .circle {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      border: 4px solid #007BFF;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      line-height: 120px;
+      font-size: 1.6em;
+      color: #007BFF;
+    }
+
+   #retry-button {
+  padding: 12px 25px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1.2em; /* تعديل حجم الخط */
+}
+
+    #retry-button:hover {
+      background-color: #218838;
+    }
+
+    /* شاشة الترحيب */
+   #welcome-screen {
+  background-image: url('face.jpg'); /* اسم الصورة هنا */
+  background-size: contain; /* جعل الصورة تتناسب مع المساحة ولكن مع الحفاظ على نسبتها */
+  background-position: center; /* لضبط الصورة في منتصف الشاشة */
+  background-repeat: no-repeat; /* لمنع تكرار الصورة */
+  width: 100%;
+  height: 100vh; /* ملء الشاشة بالكامل */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* النص باللون الأبيض لضمان وضوحه */
+  text-align: center;
+}
+
+
+    #welcome-screen button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #welcome-screen button:hover {
+      background-color: #218838;
+    }
+
+    /* تنسيق السؤال */
+    #question-container {
+      background-color: #e0f7fa;
+      padding: 20px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #question-image {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* تنسيق نتائج الأسئلة */
+    .question-summary {
+      text-align: left;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .correct-answer {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .wrong-answer {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .user-answer {
+      font-weight: bold;
+    }
+
+    .incorrect-user-answer {
+      color: #dc3545;
+    }
+
+    /* لرقم السؤال الحالي */
+    #current-question-info {
+      font-size: 1.1em;
+      margin-top: 20px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    /* سكرول بار للتفاصيل */
+    #detailed-summary {
+      max-height: 300px; /* يمكنك تعديل الارتفاع حسب احتياجك */
+      overflow-y: auto;
+      padding-right: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+ <!-- شاشة الترحيب -->
+<div id="welcome-screen">
+  <div style="position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <img src="welcome-image.jpg" alt="صورة ترحيبية" style="width: 100px; height: auto; position: absolute; top: 10px; right: 140px;">
+       
+    <!-- صندوق النص -->
+    <div style="margin-top: -100px; padding: 20px; border: 2px solid #333; border-radius: 10px; background-color: rgba(255, 255, 255, 0.5); width: 70%; text-align: center;">
+      <div style="font-size: 24px; font-weight: bold; color: #333;">
+  <br>
+     اختبار تفاعلي في <span style="color: #000; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">مادة اللغة الإنجليزية   </span><br>
+الفصل الدراسي الأول
+      </div>
+      <div style="font-size: 18px; color: #333; margin-top: 10px;">
+     <span style="font-size: 30px; color: #006400; font-weight: bold; text-shadow: 1px 1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px -1px 0 #FFFFFF;">الصف الخامس</span>
+      </div>
+      <div style="font-size: 0.8em; color: #003366; margin-top: 20px;">
+        اعداد الأسئلة : أ.محمد وسيم <br>
+        تصميم وبرمجة : أ.طلال المحرزي<br>
+    ولاية بركاء<br>
+        <a href="mailto:surmad7@gmail.com" style="color: #003366;">surmad7@gmail.com</a><br>
+      </div>
+    </div>
+
+    <button onclick="startQuiz()" style="position: absolute; bottom: 20px; left: 140px;">دخول</button>
+  </div>
+</div>
+
+
+<!-- نافذة الأسئلة -->
+<div id="quiz-container" style="display: none;">
+  <div id="question-container" style="text-align: center; margin-bottom: 20px;">
+    <img id="question-image" src="" alt="سؤال صورة" style="display:none; width: 100%; max-width: 350px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19); border-radius: 10px; margin: 10px auto;">
+    <br>
+    <div id="question" style="font-size: 24px; font-weight: bold; color: #333;">سؤال</div>
+  </div>
+  <div id="choices"></div>
+  <button id="next-button" onclick="nextQuestion()">التالي</button>
+  <div id="current-question-info" style="margin-top: 10px; font-size: 18px; color: #555;">السؤال 1 من 3</div>
+</div>
+
+  <div id="overlay"></div>
+  <div id="result-popup">
+    <div class="circle" id="final-score">0</div>
+    <p id="summary"></p>
+    <div id="summary-container">
+      <div id="detailed-summary"></div>
+    </div>
+    <button id="retry-button" onclick="restartQuiz()">إعادة المحاولة</button>
+  </div>
+
+  <!-- أصوات -->
+  <audio id="correct-sound" src="correct-answer.mp3"></audio>
+  <audio id="wrong-sound" src="wrong-answer.mp3"></audio>
+  <audio id="completion-sound" src="completion-sound.mp3"></audio>
+
+<script>
+ const questions = [
+
+ {
+    "number": 1,
+    "question": "Today is ________day of the year.",
+    "choices": ["cold", "colder than", "the coldest", "more cold"],
+    "correct": 2,
+    "image": "",
+    "answer": "the coldest"
+  },
+  {
+    "number": 2,
+    "question": "Ali __________a beard and a moustache.",
+    "choices": ["is", "have got", "haven’t got", "has got"],
+    "correct": 3,
+    "image": "",
+    "answer": "has got"
+  },
+  {
+    "number": 3,
+    "question": "My car is _________my sister’s car.",
+    "choices": ["faster", "faster than", "fast", "the fastest"],
+    "correct": 1,
+    "image": "",
+    "answer": "faster than"
+  },
+  {
+    "number": 4,
+    "question": "________ you go to the cinema last week?",
+    "choices": ["do", "does", "did", "doing"],
+    "correct": 2,
+    "image": "",
+    "answer": "did"
+  },
+  {
+    "number": 5,
+    "question": "Fatma is ________person in my family.",
+    "choices": ["the best", "better than", "good", "better"],
+    "correct": 0,
+    "image": "",
+    "answer": "the best"
+  },
+  {
+    "number": 6,
+    "question": "I have a shower ________ I go to school.",
+    "choices": ["before", "but", "because", "or"],
+    "correct": 0,
+    "image": "",
+    "answer": "before"
+  },
+  {
+    "number": 7,
+    "question": "Last month, I _________to Safari World Oman in Ibra.",
+    "choices": ["go", "went", "goes", "going"],
+    "correct": 1,
+    "image": "",
+    "answer": "went"
+  },
+  {
+    "number": 8,
+    "question": "Fatma and Maha ___________watch a movie next week.",
+    "choices": ["will", "don’t", "would", "wouldn’t"],
+    "correct": 0,
+    "image": "",
+    "answer": "will"
+  },
+  {
+    "number": 9,
+    "question": "Youssef ________Ali are friends.",
+    "choices": ["but", "or", "because", "and"],
+    "correct": 3,
+    "image": "",
+    "answer": "and"
+  },
+  {
+    "number": 10,
+    "question": "When I ______6 years old, I went to London.",
+    "choices": ["am", "was", "were", "is"],
+    "correct": 1,
+    "image": "",
+    "answer": "was"
+  },
+  {
+    "number": 11,
+    "question": "My uncle will travel to Paris ______ week.",
+    "choices": ["last", "ago", "before", "next"],
+    "correct": 3,
+    "image": "",
+    "answer": "next"
+  },
+  {
+    "number": 12,
+    "question": "A ______________ deep is the Sea of Oman?",
+    "choices": ["Where", "What", "How", "Who"],
+    "correct": 2,
+    "image": "",
+    "answer": "How"
+  },
+  {
+    "number": 13,
+    "question": "Noor ______________ cook when she was two years old.",
+    "choices": ["can", "can’t", "couldn't", "could"],
+    "correct": 2,
+    "image": "",
+    "answer": "couldn't"
+  },
+  {
+    "number": 14,
+    "question": "Yesterday, I ______________ table tennis with my friends.",
+    "choices": ["play", "plays", "played", "didn’t played"],
+    "correct": 2,
+    "image": "",
+    "answer": "played"
+  },
+  {
+    "number": 15,
+    "question": "Mohammed and Taha went to Dubai three years ________.",
+    "choices": ["ago", "after", "old", "last"],
+    "correct": 0,
+    "image": "",
+    "answer": "ago"
+  },
+  {
+    "number": 16,
+    "question": "Ali is good ______________ playing the guitar.",
+    "choices": ["in", "at", "on", "of"],
+    "correct": 1,
+    "image": "",
+    "answer": "at"
+  },
+  {
+    "number": 17,
+    "question": "You ______________ tidy your room every day.",
+    "choices": ["have", "has", "had", "have to"],
+    "correct": 3,
+    "image": "",
+    "answer": "have to"
+  },
+  {
+    "number": 18,
+    "question": "How ______________ is Jebel Shams?",
+    "choices": ["wide", "deep", "high", "old"],
+    "correct": 2,
+    "image": "",
+    "answer": "high"
+  },
+  {
+    "number": 19,
+    "question": "This is the boy __________ lives next door to us.",
+    "choices": ["where", "what", "who", "which"],
+    "correct": 2,
+    "image": "",
+    "answer": "who"
+  },
+  {
+    "number": 20,
+    "question": "Sami plays chess ______________ Sundays.",
+    "choices": ["in", "at", "on", "by"],
+    "correct": 2,
+    "image": "",
+    "answer": "on"
+  },
+{
+    "number": 21,
+    "question": "",
+    "choices": [
+      "My brother is great at counting.",
+      "My brother is great at baking cakes.",
+      "My brother is great at doing experiments.",
+      "My brother is great at juggling."
+    ],
+    "correct": 2,
+    "image": "21.jpg",
+    "answer": "My brother is great at doing experiments."
+  },
+  {
+    "number": 22,
+    "question":  "",
+    "choices": [
+      "Children enjoy reading stories with the teacher.",
+      "Children enjoy drawing pictures with the teacher.",
+      "Children enjoy playing games with the teacher.",
+      "Children enjoy making models with the teacher."
+    ],
+    "correct": 0,
+    "image": "22.jpg",
+    "answer": "Children enjoy reading stories with the teacher."
+  },
+  {
+    "number": 23,
+    "question":  "",
+    "choices": [
+      "Salem is tidy.",
+      "Salem is friendly.",
+      "Salem is polite.",
+      "Salem is untidy."
+    ],
+    "correct": 3,
+    "image": "23.jpg",
+    "answer": "Salem is untidy."
+  },
+  {
+    "number": 24,
+    "question":  "",
+    "choices": [
+      "Sami is throwing balls.",
+      "Sami is juggling balls.",
+      "Sami is colouring balls.",
+      "Sami is counting balls."
+    ],
+    "correct": 1,
+    "image": "24.jpg",
+    "answer": "Sami is juggling balls."
+  },
+  {
+    "number": 25,
+    "question":  "",
+    "choices": [
+      "Muna is good at making pasta.",
+      "Muna is good at making pizza.",
+      "Muna is good at making models.",
+      "Muna is good at making hot chocolate."
+    ],
+    "correct": 1,
+    "image": "25.jpg",
+    "answer": "Muna is good at making pizza."
+  },
+  {
+    "number": 26,
+    "question": "",
+    "choices": [
+      "Salim goes surfing on Sundays.",
+      "Salim goes swimming on Sundays.",
+      "Salim goes skiing on Sundays.",
+      "Salim goes cycling on Sundays."
+    ],
+    "correct": 0,
+    "image": "26.jpg",
+    "answer": "Salim goes surfing on Sundays."
+  },
+  {
+    "number": 27,
+    "question":  "",
+    "choices": [
+      "Yesterday, Julia posted a letter to her friend Emily.",
+      "Yesterday, Julia sent an email to her friend Emily.",
+      "Yesterday, Julia met her friend Emily.",
+      "Yesterday, Julia called her friend Emily."
+    ],
+    "correct": 0,
+    "image": "27.jpg",
+    "answer": "Yesterday, Julia posted a letter to her friend Emily."
+  },
+  {
+    "number": 28,
+    "question":  "",
+    "choices": [
+      "Frankincense was very important in the past.",
+      "Speaking tube was very important in the past.",
+      "Wood was very important in the past.",
+      "Telephone was very important in the past."
+    ],
+    "correct": 0,
+    "image": "28.jpg",
+    "answer": "Frankincense was very important in the past."
+  },
+  {
+    "number": 29,
+    "question": "",
+    "choices": [
+      "My dad went to the pharmacy.",
+      "My dad went to the kiosk.",
+      "My dad went to the corner shop.",
+      "My dad went to the butcher."
+    ],
+    "correct": 0,
+    "image": "29.jpg",
+    "answer": "My dad went to the pharmacy."
+  },
+  {
+    "number": 30,
+    "question":  "",
+    "choices": [
+      "Tameem is shy.",
+      "Tameem is confident.",
+      "Tameem is rude.",
+      "Tameem is lazy."
+    ],
+    "correct": 3,
+    "image": "30.jpg",
+    "answer": "Tameem is lazy."
+  }
+
+
+
+ ];
+
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let userAnswers = [];
+
+
+  function startQuiz() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('quiz-container').style.display = 'block';
+    loadQuestion();
+  }
+
+function loadQuestion() {
+
+    const questionElement = document.getElementById('question');
+    const choicesContainer = document.getElementById('choices');
+    const questionImage = document.getElementById('question-image'); 
+    const currentQuestionInfo = document.getElementById('current-question-info');
+    
+    const question = questions[currentQuestionIndex];
+
+
+    // عرض السؤال
+    questionElement.textContent = question.question;
+
+    // التحقق من وجود الصورة وتحديثها
+    if (question.image && question.image.trim() !== "") {
+        questionImage.src = question.image; // ضبط مصدر الصورة
+        questionImage.onload = () => {
+            questionImage.style.display = 'block'; // إظهار الصورة عند تحميلها بنجاح
+        };
+        questionImage.onerror = () => {
+            questionImage.style.display = 'none'; // إخفاء الصورة إذا فشل تحميلها
+        };
+    } else {
+        questionImage.style.display = 'none'; // إخفاء الصورة إذا لم توجد
+    }
+
+    // إعادة تعيين خيارات الإجابة
+    choicesContainer.innerHTML = '';
+    question.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.classList.add('choice-button'); 
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+
+    // تحديث معلومات السؤال الحالي
+    currentQuestionInfo.textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+}
+
+
+  function selectAnswer(index) {
+    const correctIndex = questions[currentQuestionIndex].correct;
+    const buttons = document.querySelectorAll('#choices button');
+    buttons.forEach(button => {
+      button.disabled = true; // تعطيل الأزرار بعد الإجابة
+      if (button.textContent === questions[currentQuestionIndex].choices[correctIndex]) {
+        button.classList.add('correct');
+      }
+    });
+
+    if (index === correctIndex) {
+      score++;
+      document.getElementById('correct-sound').play(); // تشغيل الصوت الصحيح
+    } else {
+      buttons[index].classList.add('wrong');
+      document.getElementById('wrong-sound').play(); // تشغيل الصوت الخاطئ
+    }
+
+    userAnswers[currentQuestionIndex] = questions[currentQuestionIndex].choices[index];
+
+    // إظهار زر التالي فقط بعد اختيار الإجابة
+    document.getElementById('next-button').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    if (userAnswers[currentQuestionIndex] === undefined) {  // التحقق إذا لم يتم اختيار الإجابة
+        alert("من فضلك اختر إجابة قبل الانتقال للسؤال التالي.");
+        return; // لا تنتقل للسؤال التالي إلا بعد اختيار إجابة
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+      document.getElementById('next-button').classList.add('hidden');
+    } else {
+      showResult();
+      document.getElementById('completion-sound').play(); // تشغيل الصوت عند اكتمال الأسئلة
+    }
+}
+
+
+  function showResult() {
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('result-popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('final-score').textContent = score;
+
+    let summary = "أنت لم تكمل جميع الأسئلة!";
+    let detailedSummary = "";
+
+ 
+    document.getElementById('summary').textContent = `إجمالي النقاط: ${score} من ${questions.length}`;
+    document.getElementById('detailed-summary').innerHTML = detailedSummary;
+  }
+
+  function restartQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    userAnswers = [];
+    document.getElementById('result-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('welcome-screen').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>
+
